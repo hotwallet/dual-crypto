@@ -79,14 +79,15 @@ const generateAsymmetricKeyPair = async (masterKey, salt, iterations) => {
   return ec.genKeyPair({entropy})
 }
 
-const DualCrypto = async ({ secret, iterations = 1000000 } = {}) => {
+const DualCrypto = async ({ secret, salt, iterations = 1000000 } = {}) => {
   if (!secret) throw new Error('secret is required')
 
-  // we assume no two users will have the same secret
-  // so it's ok that we're not using a unique salt
-  const secretReverse = secret.split('').reverse().join('')
-  const symmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(secret))
-  const asymmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(secretReverse))
+  // if we assume no two users have the same secret, then we can derive a default unique salt
+  // otherwise, a unique salt should be provided
+  salt = salt || secret
+  const saltReverse = salt.split('').reverse().join('')
+  const symmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(salt))
+  const asymmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(saltReverse))
 
   const masterKey = await generateMasterKey(secret)
   const symmetric = await generateSymmetricKey(masterKey, symmetricSalt, iterations)
@@ -133,7 +134,7 @@ DualCrypto.generateSecret = function (numberOfWords) {
   window.crypto.getRandomValues(array)
   const secret = []
   for (let i = 0; i < array.length; i++) {
-    const index = (array[i] % 5852)
+    const index = (array[i] % wordlist.length)
     secret.push(wordlist[index])
   }
   return secret.join(' ')

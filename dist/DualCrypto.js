@@ -15785,10 +15785,11 @@ var DualCrypto = function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
     var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         secret = _ref5.secret,
+        salt = _ref5.salt,
         _ref5$iterations = _ref5.iterations,
         iterations = _ref5$iterations === undefined ? 1000000 : _ref5$iterations;
 
-    var secretReverse, symmetricSalt, asymmetricSalt, masterKey, symmetric, asymmetric, symmetricAlgo;
+    var saltReverse, symmetricSalt, asymmetricSalt, masterKey, symmetric, asymmetric, symmetricAlgo;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -15802,25 +15803,26 @@ var DualCrypto = function () {
 
           case 2:
 
-            // we assume no two users will have the same secret
-            // so it's ok that we're not using a unique salt
-            secretReverse = secret.split('').reverse().join('');
-            symmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(secret));
-            asymmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(secretReverse));
-            _context4.next = 7;
+            // if we assume no two users have the same secret, then we can derive a default unique salt
+            // otherwise, a unique salt should be provided
+            salt = salt || secret;
+            saltReverse = salt.split('').reverse().join('');
+            symmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(salt));
+            asymmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(saltReverse));
+            _context4.next = 8;
             return generateMasterKey(secret);
 
-          case 7:
+          case 8:
             masterKey = _context4.sent;
-            _context4.next = 10;
+            _context4.next = 11;
             return generateSymmetricKey(masterKey, symmetricSalt, iterations);
 
-          case 10:
+          case 11:
             symmetric = _context4.sent;
-            _context4.next = 13;
+            _context4.next = 14;
             return generateAsymmetricKeyPair(masterKey, asymmetricSalt, iterations);
 
-          case 13:
+          case 14:
             asymmetric = _context4.sent;
             symmetricAlgo = 'AES-GCM';
             return _context4.abrupt('return', {
@@ -15846,7 +15848,7 @@ var DualCrypto = function () {
               }
             });
 
-          case 16:
+          case 17:
           case 'end':
             return _context4.stop();
         }
@@ -15877,7 +15879,7 @@ DualCrypto.generateSecret = function (numberOfWords) {
   window.crypto.getRandomValues(array);
   var secret = [];
   for (var i = 0; i < array.length; i++) {
-    var index = array[i] % 5852;
+    var index = array[i] % _wordlist2.default.length;
     secret.push(_wordlist2.default[index]);
   }
   return secret.join(' ');
