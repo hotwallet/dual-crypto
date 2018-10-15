@@ -24,12 +24,8 @@ async () => {
   const isAuthentic = DualCrypto.verify({ publicKey, message, signature })
 
   // symmetric functions
-  dc.encrypt(message).then(encryptedMessage => {
-    dc.decrypt(encryptedMessage).then(decryptedMessage => {
-      // message === decryptedMessage
-    })
-  })
-
+  const encryptedMessage = await dc.encrypt(message)
+  const decryptedMessage = await dc.decrypt(encryptedMessage)
 }
 ```
 
