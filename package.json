@@ -1,0 +1,31 @@
+{
+  "name": "dual-crypto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/DualCrypto.js",
+  "scripts": {
+    "browserify": "browserify src/DualCrypto.js -g [ babelify --presets [ \"babel-preset-env\" ] ] -o dist/DualCrypto.js",
+    "test": "npm run browserify && node test/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hotwallet/dual-crypto.git"
+  },
+  "author": "will123195",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hotwallet/dual-crypto/issues"
+  },
+  "homepage": "https://github.com/hotwallet/dual-crypto#readme",
+  "dependencies": {
+    "elliptic": "^6.4.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^8.0.0",
+    "browserify": "^16.2.3",
+    "express": "^4.16.4"
+  }
+}
