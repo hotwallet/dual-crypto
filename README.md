@@ -15,7 +15,7 @@ import DualCrypto from 'dual-crypto'
 
 async () => {
   const secret = DualCrypto.generateSecret(6) // 6 words
-  const salt = '' // specify a salt if the secret is not unique
+  const salt = '' // specify a salt if the secret may not be unique
   const dc = await DualCrypto({ secret, salt })
   const message = 'I am Satoshi Nakamoto'
 
