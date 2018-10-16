@@ -12,13 +12,6 @@ const crypto = window.crypto
 
 const bufToStr = str => (new TextDecoder().decode(str))
 
-function toHex(str) {
-  return unescape(encodeURIComponent(str))
-    .split('')
-    .map(v => v.charCodeAt(0).toString(16))
-    .join('')
-}
-
 function hexToBuf(hex) {
   const bytes = []
   for (let c = 0; c < hex.length; c += 2) {

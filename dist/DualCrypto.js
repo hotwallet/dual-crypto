@@ -15665,12 +15665,6 @@ var bufToStr = function bufToStr(str) {
   return new TextDecoder().decode(str);
 };
 
-function toHex(str) {
-  return unescape(encodeURIComponent(str)).split('').map(function (v) {
-    return v.charCodeAt(0).toString(16);
-  }).join('');
-}
-
 function hexToBuf(hex) {
   var bytes = [];
   for (var c = 0; c < hex.length; c += 2) {
