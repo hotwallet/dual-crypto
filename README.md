@@ -21,8 +21,8 @@ async () => {
 
   // asymmetric functions
   const publicKey = dc.getPublicKey()
-  const signature = dc.sign(message)
-  const isAuthentic = DualCrypto.verify({ publicKey, message, signature })
+  const signature = await dc.sign(message)
+  const isAuthentic = await DualCrypto.verify({ publicKey, message, signature })
 
   // symmetric functions
   const encryptedMessage = await dc.encrypt(message)

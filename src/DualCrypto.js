@@ -8,6 +8,8 @@ function stringToArrayBuffer(string) {
   return new window.TextEncoder('utf-8').encode(string)
 }
 
+const crypto = window.crypto
+
 const bufToStr = str => (new TextDecoder().decode(str))
 
 function toHex(str) {
@@ -40,7 +42,7 @@ function arrayBufferToHexString(arrayBuffer) {
 }
 
 const generateMasterKey = async (password) => {
-  return window.crypto.subtle.importKey(
+  return crypto.subtle.importKey(
     'raw',
     stringToArrayBuffer(password),
     { name: 'PBKDF2' },
@@ -50,7 +52,7 @@ const generateMasterKey = async (password) => {
 }
 
 const generateSymmetricKey = async (masterKey, salt, iterations) => {
-  return await window.crypto.subtle.deriveKey(
+  return await crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: stringToArrayBuffer(salt),
@@ -65,7 +67,7 @@ const generateSymmetricKey = async (masterKey, salt, iterations) => {
 }
 
 const generateAsymmetricKeyPair = async (masterKey, salt, iterations) => {
-  let entropy = await window.crypto.subtle.deriveBits(
+  let entropy = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
       salt: stringToArrayBuffer(salt),
@@ -79,6 +81,11 @@ const generateAsymmetricKeyPair = async (masterKey, salt, iterations) => {
   return ec.genKeyPair({entropy})
 }
 
+const sha256 = async str => {
+  const arrayBuffer = await crypto.subtle.digest('SHA-256', stringToArrayBuffer(str))
+  return arrayBufferToHexString(arrayBuffer)
+}
+
 const DualCrypto = async ({ secret, salt, iterations = 1000000 } = {}) => {
   if (!secret) throw new Error('secret is required')
 
@@ -86,12 +93,9 @@ const DualCrypto = async ({ secret, salt, iterations = 1000000 } = {}) => {
   // otherwise, a unique salt should be provided
   salt = salt || secret
   const saltReverse = salt.split('').reverse().join('')
-  const symmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(salt))
-  const asymmetricSalt = crypto.subtle.digest('SHA-256', stringToArrayBuffer(saltReverse))
-
   const masterKey = await generateMasterKey(secret)
-  const symmetric = await generateSymmetricKey(masterKey, symmetricSalt, iterations)
-  const asymmetric = await generateAsymmetricKeyPair(masterKey, asymmetricSalt, iterations)
+  const symmetric = await generateSymmetricKey(masterKey, sha256(salt), iterations)
+  const asymmetric = await generateAsymmetricKeyPair(masterKey, sha256(saltReverse), iterations)
 
   const symmetricAlgo = 'AES-GCM'
 
@@ -100,35 +104,39 @@ const DualCrypto = async ({ secret, salt, iterations = 1000000 } = {}) => {
       return asymmetric.getPublic().encode('hex')
     },
 
-    sign(message) {
-      // TODO: hash the message to sign
-      return asymmetric.sign(toHex(message)).toDER('hex')
+    sign: async message => {
+      const hash = await sha256(message)
+      return asymmetric.sign(hash).toDER('hex')
     },
 
-    encrypt(message) {
+    encrypt: async message => {
       const data = stringToArrayBuffer(message)
       const iv = window.crypto.getRandomValues(new Uint8Array(16))
-      return window.crypto.subtle.encrypt({ name: symmetricAlgo, iv }, symmetric, data)
-        .then(encryptedData => {
-          return arrayBufferToHexString(iv) + arrayBufferToHexString(encryptedData)
-        })
+      const encryptedData = await crypto.subtle.encrypt({
+        name: symmetricAlgo,
+        iv
+      }, symmetric, data)
+      return arrayBufferToHexString(iv) + arrayBufferToHexString(encryptedData)
     },
 
-    decrypt(encryptedMessage) {
+    decrypt: async encryptedMessage => {
       const iv = hexToBuf(encryptedMessage.substring(0, 32))
       const data = hexToBuf(encryptedMessage.substring(32))
-      return window.crypto.subtle.decrypt({ name: symmetricAlgo, iv }, symmetric, data)
-        .then(decryptedData => bufToStr(decryptedData))
+      const decryptedData = await crypto.subtle.decrypt({
+        name: symmetricAlgo,
+        iv
+      }, symmetric, data)
+      return bufToStr(decryptedData)
     }
   }
 }
 
 export default DualCrypto
 
-DualCrypto.verify = function ({ publicKey, message, signature } = {}) {
+DualCrypto.verify = async function ({ publicKey, message, signature } = {}) {
   const key = ec.keyFromPublic(publicKey, 'hex')
-  // TODO: verify the hashed message that was signed
-  return key.verify(toHex(message), signature)
+  const hash = await sha256(message)
+  return key.verify(hash, signature)
 }
 
 if (typeof window !== 'undefined') {

@@ -11,15 +11,18 @@ DualCrypto({ secret })
     const publicKey = dc.getPublicKey()
     console.log('publicKey:', publicKey)
 
-    const signature = dc.sign(message)
-    console.log('signature:', signature)
+    dc.sign(message).then(signature => {
+      console.log('signature:', signature)
 
-    const isAuthentic = DualCrypto.verify({ publicKey, message, signature })
-    console.log(message, isAuthentic)
+      DualCrypto.verify({ publicKey, message, signature }).then(isAuthentic => {
+        console.log(message, isAuthentic)
+      })
 
-    const wrongMessage = 'Craig Wright'
-    const result = DualCrypto.verify({ publicKey, message: wrongMessage, signature })
-    console.log(wrongMessage, result)
+      const wrongMessage = 'Craig Wright'
+      DualCrypto.verify({ publicKey, message: wrongMessage, signature }).then(result => {
+        console.log(wrongMessage, result)
+      })
+    })
 
     // // symmetric functions
     dc.encrypt(message).then(encryptedMessage => {
