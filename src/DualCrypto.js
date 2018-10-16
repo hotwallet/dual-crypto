@@ -1,7 +1,7 @@
 import 'babel-polyfill'
 import { ec as EC } from 'elliptic'
-import wordlist from './wordlist'
 
+// TODO: consider https://github.com/bitchan/eccrypto
 const ec = new EC('secp256k1')
 
 function stringToArrayBuffer(string) {
@@ -101,6 +101,7 @@ const DualCrypto = async ({ secret, salt, iterations = 1000000 } = {}) => {
     },
 
     sign(message) {
+      // TODO: hash the message to sign
       return asymmetric.sign(toHex(message)).toDER('hex')
     },
 
@@ -126,18 +127,8 @@ export default DualCrypto
 
 DualCrypto.verify = function ({ publicKey, message, signature } = {}) {
   const key = ec.keyFromPublic(publicKey, 'hex')
+  // TODO: verify the hashed message that was signed
   return key.verify(toHex(message), signature)
-}
-
-DualCrypto.generateSecret = function (numberOfWords) {
-  const array = new Uint32Array(numberOfWords)
-  window.crypto.getRandomValues(array)
-  const secret = []
-  for (let i = 0; i < array.length; i++) {
-    const index = (array[i] % wordlist.length)
-    secret.push(wordlist[index])
-  }
-  return secret.join(' ')
 }
 
 if (typeof window !== 'undefined') {

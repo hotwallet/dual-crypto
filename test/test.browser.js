@@ -1,6 +1,6 @@
 const DualCrypto = window.DualCrypto
 
-const secret = DualCrypto.generateSecret(6)
+const secret = 'correct horse battery staple'
 console.log('secret:', secret)
 
 DualCrypto({ secret })
