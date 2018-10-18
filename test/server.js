@@ -1,7 +1,7 @@
 const http = require('http')
 const express = require('express')
 
-const port = 8081
+const port = process.env.PORT || 8081
 
 const app = express()
 

@@ -2,10 +2,10 @@
   "name": "dual-crypto",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/DualCrypto.js",
+  "main": "dist/DualCrypto.min.js",
   "scripts": {
-    "browserify": "browserify src/DualCrypto.js -g [ babelify --presets [ \"babel-preset-env\" ] ] -o dist/DualCrypto.js",
-    "test": "npm run browserify && node test/server.js"
+    "minify": "browserify src/DualCrypto.js -g [ babelify --presets [ \"babel-preset-env\" ] ] | uglifyjs --source-map -m -c -o dist/DualCrypto.min.js",
+    "test": "npm run minify && node test/test.puppeteer.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,8 @@
     "babel-preset-env": "^1.7.0",
     "babelify": "^8.0.0",
     "browserify": "^16.2.3",
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "puppeteer": "^1.9.0",
+    "uglify-js": "^3.4.9"
   }
 }
