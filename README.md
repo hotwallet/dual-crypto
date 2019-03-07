@@ -15,9 +15,10 @@ npm i dual-crypto
 ```js
 import DualCrypto from 'dual-crypto'
 
-async () => {
   const secret = 'correct horse battery staple'
-  const salt = 'my custom salt' // (optional) if secret is not unique, use a custom salt
+  const salt = 'my custom salt' // optional*
+
+async () => {
   const dc = await DualCrypto({ secret, salt })
   const message = 'I am Satoshi Nakamoto'
 
@@ -31,6 +32,8 @@ async () => {
   const decryptedMessage = await dc.decrypt(encryptedMessage)
 }
 ```
+
+*Note: if your secret is guessable, specify a `salt` to prevent [rainbow table attacks](https://en.wikipedia.org/wiki/Rainbow_table).
 
 ### License
 
