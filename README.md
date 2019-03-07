@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hotwallet/dual-crypto.svg?branch=master)](https://travis-ci.org/hotwallet/dual-crypto)
 
-Simple symmetric and asymmetric cryptography for the browser
+Simple deterministic symmetric and asymmetric cryptography for the browser
 
 ### Install
 
